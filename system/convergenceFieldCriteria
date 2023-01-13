@@ -1,0 +1,47 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  7
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+
+convergenceFieldCriteria
+{
+        type             surfaceFieldValue;
+        libs             ("libfieldFunctionObjects.so");
+  
+        enabled          true;
+	writeControl     timeStep; 
+	writeInterval    1;
+        log              false;
+        writeFields      false;
+	writeArea        false;
+        surfaceFormat    raw;
+        regionType       sampledSurface;
+        name             plane1;
+
+	sampledSurfaceDict
+        {
+               type		plane;
+               planeType        pointAndNormal;
+
+               pointAndNormalDict
+               {
+	           basePoint        (0.2 0 0);
+	           normalVector     (1 0 0);
+               }
+
+	}
+
+        operation       weightedAreaAverage;
+        fields
+        (
+              p
+              T
+              rho
+        );
+}
+
+
+// ************************************************************************* //

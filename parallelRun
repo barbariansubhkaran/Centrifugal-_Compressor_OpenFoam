@@ -1,0 +1,47 @@
+#!/bin/sh
+cd ${0%/*} || exit 1    # Run from this directory
+
+# Source tutorial run functions
+. $WM_PROJECT_DIR/bin/tools/RunFunctions
+
+rm -r ./log* ./postProcessing ./processor*
+rm -r ./0
+cp -r 0.Base 0
+
+# Meshing
+runApplication blockMesh
+runApplication surfaceFeatures
+runApplication decomposePar
+runParallel snappyHexMesh -overwrite
+runApplication reconstructParMesh -constant
+# Run reconstrucPar fields if createBaffles = false
+# runApplication reconstructPar -withZero -fields '(nSurfaceLayers cellLevel pointLevel thickness thicknessFraction)'
+rm -r processor*
+
+# Create the inlet/outlet, AMI patches and reconstructMesh
+runApplication createBaffles -overwrite
+runApplication mergeOrSplitBaffles -split -overwrite
+runApplication renumberMesh -noFields -overwrite
+runApplication mapFields ../compressor -mapMethod mapNearest -sourceTime 'latestTime' -consistent
+rm ./0/yPlus ./0/u ./0/rho ./0/wallShearStress ./0/Ur ./0/Ut
+
+mv log.decomposePar log.decomposePar1
+mv log.reconstructPar log.reconstructPar1
+
+runApplication setFields
+runApplication decomposePar
+runParallel $(getApplication)
+runApplication reconstructPar -latestTime
+
+mv log.decomposePar log.decomposePar2
+mv log.reconstructPar log.reconstructPar2
+mv log.turboSimpleFoam log.turboSimpleFoamMain
+
+runApplication $(getApplication) -postProcess -func yPlus
+mv log.turboSimpleFoam log.turboSimpleFoamYPlus
+
+runApplication $(getApplication) -postProcess -func wallShearStress
+mv log.turboSimpleFoam log.turboSimpleFoamWallShearStress
+
+
+#------------------------------------------------------------------------------

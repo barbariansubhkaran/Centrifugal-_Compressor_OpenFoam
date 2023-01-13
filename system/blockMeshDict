@@ -1,0 +1,158 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  7
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       dictionary;
+    object      blockMeshDict;
+}
+
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+convertToMeters 1;
+
+vertices
+(
+
+// mainDomain
+
+    (-0.2 -0.2 -0.05)
+    ( 0.105 -0.2 -0.05)
+    ( 0.105  0.2 -0.05)
+    (-0.2  0.2 -0.05)
+    (-0.2 -0.2  0.1)
+    ( 0.105 -0.2  0.1)
+    ( 0.105  0.2  0.1)
+    (-0.2  0.2  0.1)
+
+// inletExtrusion
+
+    (-0.2 -0.2 0.1)
+    ( 0.105 -0.2 0.1)
+    ( 0.105  0.2 0.1)
+    (-0.2  0.2 0.1)
+    (-0.2 -0.2  0.4)
+    ( 0.105 -0.2  0.4)
+    ( 0.105  0.2  0.4)
+    (-0.2  0.2  0.4)
+
+// outletExtrusion
+
+    (0.105 -0.2 -0.05)
+    ( 0.7 -0.2 -0.05)
+    ( 0.7  0.2 -0.05)
+    (0.105  0.2 -0.05)
+    (0.105 -0.2  0.1)
+    ( 0.7 -0.2  0.1)
+    ( 0.7  0.2  0.1)
+    (0.105  0.2  0.1)
+);
+
+blocks
+(
+    // blocks Y=All the same number
+    // blocks X mainDomain = inletExtrusion
+    // blocks Z mainDomain = outletExtrusion
+
+    // mainDomain
+    hex (0 1 2 3 4 5 6 7) (51 67 25) simpleGrading (1 1 1)
+    // inletExtrusion
+    hex (8 9 10 11 12 13 14 15) (51 67 50) simpleGrading (1 1 1.5)
+    // outletExtrusion
+    hex (16 17 18 19 20 21 22 23) (99 67 25) simpleGrading (1.5 1 1)
+);
+
+edges
+(
+);
+
+boundary
+(
+    walls
+    {
+        type wall;
+        faces
+        (
+            (0 1 2 3)
+            (0 1 5 4)
+            (0 3 7 4)
+            (3 2 6 7)
+
+            (16 17 18 19)
+            (16 17 21 20)
+            (20 21 22 23)
+            (19 18 22 23)
+
+            (8 9 13 12)
+            (9 10 14 13)
+            (10 11 15 14)
+            (8 11 15 12)
+        );
+    }
+    inlet
+    {
+        type patch;
+        faces
+        (
+            (12 13 14 15)
+        );
+    }
+    outlet
+    {
+        type patch;
+        faces
+        (
+            (17 18 22 21)
+        );
+    }
+
+    ou
+    {
+        type wall;
+        faces
+        (
+            (1 2 6 5)
+        );
+    }
+
+    tTurbo
+    {
+        type wall;
+	faces
+	(
+            (16 19 23 20)
+	);
+    }
+
+    in
+    {
+        type wall;
+        faces
+        (
+            (4 5 6 7)
+	);
+    }
+
+    lTurbo
+    {
+        type wall;
+        faces
+        (
+	    (8 9 10 11)
+	);
+    } 
+
+);
+
+mergePatchPairs
+(
+    (in lTurbo)
+    (ou tTurbo)
+);
+// ************************************************************************* //

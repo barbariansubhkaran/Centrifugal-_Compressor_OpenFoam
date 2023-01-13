@@ -1,0 +1,63 @@
+/*--------------------------------*- C++ -*----------------------------------*\
+  =========                 |
+  \\      /  F ield         | OpenFOAM: The Open Source CFD Toolbox
+   \\    /   O peration     | Website:  https://openfoam.org
+    \\  /    A nd           | Version:  7
+     \\/     M anipulation  |
+\*---------------------------------------------------------------------------*/
+FoamFile
+{
+    version     2.0;
+    format      ascii;
+    class       volVectorField;
+    location    "0";
+    object      U;
+}
+// * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * //
+
+dimensions      [0 1 -1 0 0 0 0];
+
+internalField   uniform (39.4 0 -11.07);
+
+boundaryField
+{
+
+    inlet
+    {
+        type             zeroGradient;
+    }
+
+    outlet
+    {
+        type            flowRateOutletVelocity;
+        massFlowRate    constant 0.102;
+        rhoOutlet       1.7;          // estimate for initial rho
+    }
+
+    "(walls|extrusions|blades|propellerTip)"
+    {
+        type            noSlip;
+    }
+
+    rotorWalls
+    {
+        type            fixedValue;
+        value           uniform (0 0 0);
+    }
+
+    propeller
+    {
+        type            rotatingWallVelocity;
+        origin          (0 0 0);
+        axis            (0 0 1);
+        omega           -5236;
+    }
+
+    cyclicAMI
+    {
+	type		cyclicAMI;
+    }
+}
+
+
+// ************************************************************************* //
